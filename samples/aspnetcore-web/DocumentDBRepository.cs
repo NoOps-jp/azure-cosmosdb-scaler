@@ -29,8 +29,8 @@ namespace todo
         {
             try
             {
-                Document document = await client.ReadDocumentAsync(UriFactory.CreateDocumentUri(_options.Database, _options.Collection, id));
-                return (T)(dynamic)document;
+                var document = await client.ReadDocumentAsync<T>(UriFactory.CreateDocumentUri(_options.Database, _options.Collection, id));
+                return document.Document;
             }
             catch (DocumentClientException e)
             {
