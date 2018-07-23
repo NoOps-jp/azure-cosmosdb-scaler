@@ -10,15 +10,16 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
 {
     public class StreamlinedDocumentClient
     {
-        public StreamlinedDocumentClient(Uri serviceEndpoint, string authKeyOrResourceToken, string databaseId)
+        public StreamlinedDocumentClient(Uri serviceEndpoint, string authKeyOrResourceToken, string databaseId, ThroughputMonitor monitor = null)
         {
             _documentClient = new DocumentClient(serviceEndpoint, authKeyOrResourceToken);
-
             _databaseId = databaseId;
+            _monitor = monitor;
         }
 
         private readonly DocumentClient _documentClient;
         private readonly string _databaseId;
+        private readonly ThroughputMonitor _monitor;
 
         public async Task<T> ReadDocumentAsync<T>(string collectionId, string documentId)
         {
@@ -27,7 +28,7 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
                 var response = await _documentClient.ReadDocumentAsync<T>(UriFactory.CreateDocumentUri(_databaseId, collectionId, documentId));
 
                 // TODO: RU を送る
-                //response.RequestCharge;
+                await _monitor.TrackRequestChargeAsync(response.RequestCharge);
 
                 return response.Document;
             }
@@ -35,8 +36,9 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
             {
                 if (ex.StatusCode != null && (int)ex.StatusCode == 429)
                 {
-                    // TODO: RU を送る
-                    //ex.RequestCharge;
+                    // TODO: RU を送る with TooMany
+                    await _monitor.TrackRequestChargeAsync(ex.RequestCharge);
+                    await _monitor.TrackTooManyRequestAsync();
                 }
 
                 throw;
