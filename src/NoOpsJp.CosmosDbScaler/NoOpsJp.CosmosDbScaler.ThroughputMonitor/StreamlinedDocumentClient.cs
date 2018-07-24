@@ -10,7 +10,7 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
 {
     public class StreamlinedDocumentClient
     {
-        public StreamlinedDocumentClient(Uri serviceEndpoint, string authKeyOrResourceToken, string databaseId, ThroughputMonitor monitor = null)
+        public StreamlinedDocumentClient(Uri serviceEndpoint, string authKeyOrResourceToken, string databaseId, ThroughputAnalyzer monitor = null)
         {
             _documentClient = new DocumentClient(serviceEndpoint, authKeyOrResourceToken);
             _databaseId = databaseId;
@@ -19,7 +19,7 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
 
         private readonly DocumentClient _documentClient;
         private readonly string _databaseId;
-        private readonly ThroughputMonitor _monitor;
+        private readonly ThroughputAnalyzer _monitor;
 
         public async Task<T> ReadDocumentAsync<T>(string collectionId, string documentId)
         {
