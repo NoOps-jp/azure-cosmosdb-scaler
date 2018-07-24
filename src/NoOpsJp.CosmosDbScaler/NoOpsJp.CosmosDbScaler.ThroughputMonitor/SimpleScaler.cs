@@ -24,7 +24,7 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
                 await _client.ReadDocumentCollectionAsync(UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId));
             
             // get current throuput
-            var offersFeed = _client.ReadOffersFeedAsync().Result;
+            var offersFeed = await _client.ReadOffersFeedAsync();
             var currentOffer = offersFeed.Single(o => o.ResourceLink == collection.SelfLink);
 
             // change throuput
