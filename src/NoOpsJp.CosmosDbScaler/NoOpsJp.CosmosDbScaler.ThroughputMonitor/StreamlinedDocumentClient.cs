@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Microsoft.Azure.Documents;
@@ -27,7 +27,6 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
             {
                 var response = await _documentClient.ReadDocumentAsync<T>(UriFactory.CreateDocumentUri(_databaseId, collectionId, documentId));
 
-                // TODO: RU を送る
                 _monitor.TrackRequestCharge(collectionId, response.RequestCharge);
 
                 return response.Document;
@@ -36,7 +35,6 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
             {
                 if (ex.StatusCode != null && (int)ex.StatusCode == 429)
                 {
-                    // TODO: RU を送る with TooMany
                     _monitor.TrackRequestCharge(collectionId, ex.RequestCharge);
                     _monitor.TrackTooManyRequest(collectionId);
                 }
@@ -50,20 +48,87 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
             try
             {
                 var response = await _documentClient.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(_databaseId, collectionId), document);
+
+                _monitor.TrackRequestCharge(collectionId, response.RequestCharge);
             }
             catch (DocumentClientException ex)
             {
+                if (ex.StatusCode != null && (int)ex.StatusCode == 429)
+                {
+                    _monitor.TrackRequestCharge(collectionId, ex.RequestCharge);
+                    _monitor.TrackTooManyRequest(collectionId);
+                }
+
                 throw;
             }
         }
 
-        public async Task<IEnumerable<T>> ExecuteQueryAsync<T>(IDocumentQuery<T> documentQuery)
+        public async Task ReplaceDocumentAsync<T>(string collectionId, string documentId, T document)
         {
-            var response = await documentQuery.ExecuteNextAsync<T>();
+            try
+            {
+                var response = await _documentClient.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(_databaseId, collectionId, documentId), document);
 
-            //response.RequestCharge;
+                _monitor.TrackRequestCharge(collectionId, response.RequestCharge);
+            }
+            catch (DocumentClientException ex)
+            {
+                if (ex.StatusCode != null && (int)ex.StatusCode == 429)
+                {
+                    _monitor.TrackRequestCharge(collectionId, ex.RequestCharge);
+                    _monitor.TrackTooManyRequest(collectionId);
+                }
 
-            return response;
+                throw;
+            }
+        }
+
+        public async Task DeleteDocumentAsync(string collectionId, string documentId)
+        {
+            try
+            {
+                var response = await _documentClient.DeleteDocumentAsync(UriFactory.CreateDocumentUri(_databaseId, collectionId, documentId));
+
+                _monitor.TrackRequestCharge(collectionId, response.RequestCharge);
+            }
+            catch (DocumentClientException ex)
+            {
+                if (ex.StatusCode != null && (int)ex.StatusCode == 429)
+                {
+                    _monitor.TrackRequestCharge(collectionId, ex.RequestCharge);
+                    _monitor.TrackTooManyRequest(collectionId);
+                }
+
+                throw;
+            }
+        }
+
+        public IOrderedQueryable<T> CreateDocumentQuery<T>(string collectionId, FeedOptions feedOptions = null)
+        {
+            return _documentClient.CreateDocumentQuery<T>(UriFactory.CreateDocumentCollectionUri(_databaseId, collectionId), feedOptions);
+        }
+
+        public async Task<FeedResponse<T>> ExecuteQueryAsync<T>(IDocumentQuery<T> documentQuery)
+        {
+            try
+            {
+                var response = await documentQuery.ExecuteNextAsync<T>();
+
+                // TODO: CollectionId の取り方
+                _monitor.TrackRequestCharge("", response.RequestCharge);
+
+                return response;
+            }
+            catch (DocumentClientException ex)
+            {
+                if (ex.StatusCode != null && (int)ex.StatusCode == 429)
+                {
+                    _monitor.TrackRequestCharge("", ex.RequestCharge);
+                    _monitor.TrackTooManyRequest("");
+                }
+
+                throw;
+            }
         }
     }
 }

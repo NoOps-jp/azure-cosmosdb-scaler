@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 
+using NoOpsJp.CosmosDbScaler.ThroughputMonitor;
+
 namespace todo
 {
     using System;
@@ -14,23 +16,20 @@ namespace todo
     
     public class DocumentDBRepository<T> : IDocumentDBRepository<T> where T : class
     {
-        private DocumentClient client;
+        private StreamlinedDocumentClient client;
         private DocumentDBOptions _options;
 
-        public DocumentDBRepository(IOptions<DocumentDBOptions> options)
+        public DocumentDBRepository(IOptions<DocumentDBOptions> options, IThroughputAnalyzer throughputAnalyzer)
         {
             _options = options.Value;
-            this.client = new DocumentClient(new Uri(_options.AccountEndpoint), _options.AccountKeys);
-            CreateDatabaseIfNotExistsAsync().Wait();
-            CreateCollectionIfNotExistsAsync().Wait();
+            this.client = new StreamlinedDocumentClient(new Uri(_options.AccountEndpoint), _options.AccountKeys, _options.Database, throughputAnalyzer);
         }
 
         public async Task<T> GetItemAsync(string id)
         {
             try
             {
-                var document = await client.ReadDocumentAsync<T>(UriFactory.CreateDocumentUri(_options.Database, _options.Collection, id));
-                return document.Document;
+                return await client.ReadDocumentAsync<T>(_options.Collection, id);
             }
             catch (DocumentClientException e)
             {
@@ -47,75 +46,32 @@ namespace todo
 
         public async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate)
         {
-            IDocumentQuery<T> query = client.CreateDocumentQuery<T>(
-                UriFactory.CreateDocumentCollectionUri(_options.Database, _options.Collection),
-                new FeedOptions { MaxItemCount = -1 })
-                .Where(predicate)
-                .AsDocumentQuery();
+            var query = client.CreateDocumentQuery<T>(_options.Collection, new FeedOptions { MaxItemCount = -1 })
+                              .Where(predicate)
+                              .AsDocumentQuery();
 
             List<T> results = new List<T>();
             while (query.HasMoreResults)
             {
-                results.AddRange(await query.ExecuteNextAsync<T>());
+                results.AddRange(await client.ExecuteQueryAsync(query));
             }
 
             return results;
         }
 
-        public async Task<Document> CreateItemAsync(T item)
+        public async Task CreateItemAsync(T item)
         {
-            return await client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(_options.Database, _options.Collection), item);
+            await client.CreateDocumentAsync(_options.Collection, item);
         }
 
-        public async Task<Document> UpdateItemAsync(string id, T item)
+        public async Task UpdateItemAsync(string id, T item)
         {
-            return await client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(_options.Database, _options.Collection, id), item);
+            await client.ReplaceDocumentAsync(_options.Collection, id, item);
         }
 
         public async Task DeleteItemAsync(string id)
         {
-            await client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(_options.Database, _options.Collection, id));
-        }
-
-        private async Task CreateDatabaseIfNotExistsAsync()
-        {
-            try
-            {
-                await client.ReadDatabaseAsync(UriFactory.CreateDatabaseUri(_options.Database));
-            }
-            catch (DocumentClientException e)
-            {
-                if (e.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    await client.CreateDatabaseAsync(new Database { Id = _options.Database });
-                }
-                else
-                {
-                    throw;
-                }
-            }
-        }
-
-        private async Task CreateCollectionIfNotExistsAsync()
-        {
-            try
-            {
-                await client.ReadDocumentCollectionAsync(UriFactory.CreateDocumentCollectionUri(_options.Database, _options.Collection));
-            }
-            catch (DocumentClientException e)
-            {
-                if (e.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    await client.CreateDocumentCollectionAsync(
-                        UriFactory.CreateDatabaseUri(_options.Database),
-                        new DocumentCollection { Id = _options.Collection },
-                        new RequestOptions { OfferThroughput = 1000 });
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await client.DeleteDocumentAsync(_options.Collection, id);
         }
     }
 
