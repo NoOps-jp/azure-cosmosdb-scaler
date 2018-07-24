@@ -37,8 +37,23 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
             _requestChargeSubject.OnNext(requestCharge);
         }
 
+        //Is DateTime ok?
+        private List<DateTime> _tooManyRequestsHistory = new List<DateTime>();
+
         public void AddTooManyRequest()
         {
+            var tooManyRequestEvent = DateTime.Now;
+            
+            _tooManyRequestsHistory.Add(tooManyRequestEvent); 
+        
+            _tooManyRequestsHistory = _tooManyRequestsHistory
+                .Where(record => record >= tooManyRequestEvent.AddSeconds(-5))
+                .ToList();
+
+            if (_tooManyRequestsHistory.Count >= 4)
+            {
+                // TODO Call scaler
+            }
         }
     }
 }
