@@ -15,7 +15,10 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
 
         public void TrackTooManyRequest(string collectionId)
         {
-            //TODO:
+            // CollectionId 単位で IScaleStrategy を持つ
+            var strategy = _strategies.GetOrAdd(collectionId, x => new TStrategy { Scaler = new SimpleScaler(x) });
+
+            strategy.AddTooManyRequest();
         }
 
         private readonly ConcurrentDictionary<string, IScaleStrategy> _strategies = new ConcurrentDictionary<string, IScaleStrategy>();
