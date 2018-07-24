@@ -25,4 +25,8 @@
     <DotNetCliToolReference Include="BundlerMinifier.Core" Version="2.6.362" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\NoOpsJp.CosmosDbScaler\NoOpsJp.CosmosDbScaler.ThroughputMonitor\NoOpsJp.CosmosDbScaler.ThroughputMonitor.csproj" />
+  </ItemGroup>
+
 </Project>
