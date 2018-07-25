@@ -1,4 +1,6 @@
-﻿namespace todo.Controllers
+﻿using NoOpsJp.CosmosDbScaler.Clients;
+
+namespace todo.Controllers
 {
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
@@ -7,6 +9,7 @@
     public class ItemController : Controller
     {
         private readonly IDocumentDBRepository<todo.Models.Item> Respository;
+
         public ItemController(IDocumentDBRepository<todo.Models.Item> Respository)
         {
             this.Respository = Respository;
