@@ -12,9 +12,7 @@ namespace NoOpsJp.CosmosDbScaler.Strategies
     public class SimpleScaleStrategy : IScaleStrategy<double>
     {
         private readonly Subject<double> _requestChargeSubject = new Subject<double>();
-        private double _slopeThreshold;
-
-        // TODO determine if collection ID is in the ctor or not?
+        private double _slopeThreshold = 25;
 
         public SimpleScaleStrategy(string databaseId, string collectionId)
         {
@@ -37,7 +35,6 @@ namespace NoOpsJp.CosmosDbScaler.Strategies
         
         #region factory
 
-        // とりあえずの実装
         public static IScaleStrategy<double> Create(IDocumentClient client, string databaseId, string collectionId)
         {
             return new SimpleScaleStrategy(databaseId, collectionId)
@@ -76,7 +73,6 @@ namespace NoOpsJp.CosmosDbScaler.Strategies
             if (_slopeThreshold <= trend.Slope)
             {
                 double forecastedThroughput = CalculateForecastedThroughput(trend);
-                // TODO add after refactoring
                 await Scaler.AdjustThroughputAsync(new ScaleRequest(databaseId, collectionId, (int)forecastedThroughput));
             }
         }
