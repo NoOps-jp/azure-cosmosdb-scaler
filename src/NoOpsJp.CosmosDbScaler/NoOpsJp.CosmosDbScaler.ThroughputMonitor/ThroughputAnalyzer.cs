@@ -26,7 +26,7 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
         public void TrackTooManyRequest(string collectionId)
         {
             // CollectionId 単位で IScaleStrategy を持つ
-            var strategy = _strategies.GetOrAdd(collectionId, x => new TStrategy { Scaler = new SimpleScaler(x) });
+            var strategy = _strategies.GetOrAdd(collectionId, x => new TStrategy { Scaler = new SimpleScaler(_client, _databaseId, collectionId) });
 
             strategy.AddTooManyRequest();
         }
