@@ -1,14 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
+﻿namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
 {
-    public class ScaleRequest
-    {
-        public int TargetThroughput { get; set; }
-        public string CollectionId { get; set; }
-        public string DatabaseId { get; set; }
+    public class ScaleRequest 
+    { 
+        public string DatabaseId { get; }
+        public string CollectionId { get; }
+        public int TargetThroughput { get; }
 
+        public ScaleRequest(string databaseId, string collectionId, int targetThroughput)
+        {
+            DatabaseId = databaseId;
+            CollectionId = collectionId;
+            TargetThroughput = targetThroughput;
+        }
     }
 }

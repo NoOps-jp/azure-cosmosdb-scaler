@@ -7,11 +7,11 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
 {
     public class SimpleScaler
     {
-        private readonly DocumentClient _client;
+        private readonly IDocumentClient _client;
         private readonly string _databaseId;
         private readonly string _collectionId;
 
-        public SimpleScaler(DocumentClient client, string databaseId, string collectionId)
+        public SimpleScaler(IDocumentClient client, string databaseId, string collectionId)
         {
             _client = client;
             _databaseId = databaseId;
