@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Collections.Generic;
 
 using Newtonsoft.Json;
 
