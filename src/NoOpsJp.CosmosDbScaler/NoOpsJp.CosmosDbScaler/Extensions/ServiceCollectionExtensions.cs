@@ -1,8 +1,11 @@
-﻿using Microsoft.Azure.Documents.Client;
+﻿using System;
+
+using Microsoft.Azure.Documents.Client;
+using Microsoft.Extensions.Options;
+
 using NoOpsJp.CosmosDbScaler;
 using NoOpsJp.CosmosDbScaler.Clients;
 using NoOpsJp.CosmosDbScaler.Strategies;
-using System;
 
 // ReSharper disable CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
@@ -11,14 +14,23 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static void AddStreamlinedDocumentClient(this IServiceCollection services, Action<StreamlinedDocumentClientOptions> setupAction)
         {
-            var options = new StreamlinedDocumentClientOptions();
+            services.Configure(setupAction);
 
-            setupAction(options);
+            services.AddSingleton(provider =>
+            {
+                var options = provider.GetRequiredService<IOptions<StreamlinedDocumentClientOptions>>();
 
-            services.AddSingleton(provider => new DocumentClient(new Uri(options.AccountEndpoint), options.AccountKey));
+                return new DocumentClient(new Uri(options.Value.AccountEndpoint), options.Value.AccountKey);
+            });
+
             services.AddSingleton<IScaleController, ScaleController<SimpleScaleStrategy>>();
 
-            services.AddSingleton(provider => new StreamlinedDocumentClient(provider.GetRequiredService<DocumentClient>(), options.DatabaseId, provider.GetRequiredService<IScaleController>()));
+            services.AddSingleton(provider =>
+            {
+                var options = provider.GetRequiredService<IOptions<StreamlinedDocumentClientOptions>>();
+
+                return new StreamlinedDocumentClient(provider.GetRequiredService<DocumentClient>(), options.Value.DatabaseId, provider.GetRequiredService<IScaleController>());
+            });
         }
     }
 }
