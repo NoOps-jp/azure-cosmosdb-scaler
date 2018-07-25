@@ -5,7 +5,7 @@ Auto scaler for Azure Cosmos DB
 ![](https://noops-jp.visualstudio.com/0b69ecaf-dc1d-47b6-9696-8528d6e12537/_apis/build/status/1)
 
 # Introduction
-The purpose of this library is to flexibly scale Azure Cosmos DB. Throughput is changed by using information from Request Charges from individual client queries. Also, this it is posible to extend scaling with custom logic. This library includes a minimal database client that is also extensible. For example, sending Cosmos DB telemetry to Application Insights.
+The purpose of this library is to flexibly scale Azure Cosmos DB. Throughput is changed by using information from Request Charges from individual client queries. Also, it is possible to extend scaling with custom logic. This library includes a minimal database client that is also extensible. For example, sending Cosmos DB telemetry to Application Insights.
 
 ## Requirements
 - ASP.NET Core
