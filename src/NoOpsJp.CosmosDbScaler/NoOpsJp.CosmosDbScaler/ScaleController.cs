@@ -29,7 +29,7 @@ namespace NoOpsJp.CosmosDbScaler
         /// <param name="requestCharge"></param>
         public void TrackRequestCharge(string collectionId, double requestCharge)
         {
-            // CollectionId 単位で IScaleStrategy を持つ
+            // has ScaleStrategy in each CollectionId
             var strategy = _strategies.GetOrAdd(collectionId,SimpleScaleStrategy.Create(_client, _databaseId, collectionId));
 
             strategy.AddRequestCharge(requestCharge);
@@ -41,7 +41,7 @@ namespace NoOpsJp.CosmosDbScaler
         /// <param name="collectionId"></param>
         public void TrackTooManyRequest(string collectionId)
         {
-            // CollectionId 単位で IScaleStrategy を持つ
+            // has ScaleStrategy in each CollectionId
             var strategy = _strategies.GetOrAdd(collectionId, x => new TStrategy());
         }
 

@@ -14,7 +14,7 @@ namespace NoOpsJp.CosmosDbScaler.Strategies
 
         public SimpleScaleStrategy()
         {
-            //TODO: とりあえずな処理
+            // TODO: とりあえずな処理
             _requestChargeSubject.Buffer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1))
                                  .Select(x => x.Sum())
                                  .Do(x => Console.WriteLine($"Step1: {JsonConvert.SerializeObject(x)}"))
