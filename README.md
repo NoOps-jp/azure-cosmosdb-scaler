@@ -17,3 +17,9 @@ A NuGet package will be released in the near future. Currently this can be used 
 - Add to your own solution the [src/NoOpsJp.CosmosDbScaler solution](https://github.com/NoOps-jp/azure-cosmosdb-scaler/blob/master/src/NoOpsJp.CosmosDbScaler/NoOpsJp.CosmosDbScaler.sln).
 - Add to your own project [src/NoOpsJp.CosmosDbScaler/NoOpsJp.CosmosDbScaler/NoOpsJp.CosmosDbScaler.csproj](https://github.com/NoOps-jp/azure-cosmosdb-scaler/blob/master/src/NoOpsJp.CosmosDbScaler/NoOpsJp.CosmosDbScaler/NoOpsJp.CosmosDbScaler.csproj) as a project reference.
 - Register necessary parts in `Startup.Configure`. Refer to the sample in [samples/aspnetcore-web](https://github.com/NoOps-jp/azure-cosmosdb-scaler/blob/master/samples/aspnetcore-web)
+
+## License
+
+[MIT](http://opensource.org/licenses/MIT)
+
+Copyright (c) 2018-present, NoOps-jp
