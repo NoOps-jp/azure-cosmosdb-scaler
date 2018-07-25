@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 
 using Microsoft.Azure.Documents;
@@ -10,22 +9,24 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
 {
     public class StreamlinedDocumentClient
     {
-        public StreamlinedDocumentClient(Uri serviceEndpoint, string authKeyOrResourceToken, string databaseId, IThroughputAnalyzer monitor = null)
+        public StreamlinedDocumentClient(DocumentClient documentClient, string databaseId, IThroughputAnalyzer monitor = null)
         {
-            _documentClient = new DocumentClient(serviceEndpoint, authKeyOrResourceToken);
-            _databaseId = databaseId;
+            _documentClient = documentClient;
             _monitor = monitor;
+
+            DatabaseId = databaseId;
         }
 
         private readonly DocumentClient _documentClient;
-        private readonly string _databaseId;
         private readonly IThroughputAnalyzer _monitor;
+
+        public string DatabaseId { get; }
 
         public async Task<T> ReadDocumentAsync<T>(string collectionId, string documentId)
         {
             try
             {
-                var response = await _documentClient.ReadDocumentAsync<T>(UriFactory.CreateDocumentUri(_databaseId, collectionId, documentId));
+                var response = await _documentClient.ReadDocumentAsync<T>(UriFactory.CreateDocumentUri(DatabaseId, collectionId, documentId));
 
                 _monitor.TrackRequestCharge(collectionId, response.RequestCharge);
 
@@ -47,7 +48,7 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
         {
             try
             {
-                var response = await _documentClient.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(_databaseId, collectionId), document);
+                var response = await _documentClient.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, collectionId), document);
 
                 _monitor.TrackRequestCharge(collectionId, response.RequestCharge);
             }
@@ -67,7 +68,7 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
         {
             try
             {
-                var response = await _documentClient.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(_databaseId, collectionId, documentId), document);
+                var response = await _documentClient.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, collectionId, documentId), document);
 
                 _monitor.TrackRequestCharge(collectionId, response.RequestCharge);
             }
@@ -87,7 +88,7 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
         {
             try
             {
-                var response = await _documentClient.DeleteDocumentAsync(UriFactory.CreateDocumentUri(_databaseId, collectionId, documentId));
+                var response = await _documentClient.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, collectionId, documentId));
 
                 _monitor.TrackRequestCharge(collectionId, response.RequestCharge);
             }
@@ -105,7 +106,7 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
 
         public IOrderedQueryable<T> CreateDocumentQuery<T>(string collectionId, FeedOptions feedOptions = null)
         {
-            return _documentClient.CreateDocumentQuery<T>(UriFactory.CreateDocumentCollectionUri(_databaseId, collectionId), feedOptions);
+            return _documentClient.CreateDocumentQuery<T>(UriFactory.CreateDocumentCollectionUri(DatabaseId, collectionId), feedOptions);
         }
 
         public async Task<FeedResponse<T>> ExecuteQueryAsync<T>(IDocumentQuery<T> documentQuery)
