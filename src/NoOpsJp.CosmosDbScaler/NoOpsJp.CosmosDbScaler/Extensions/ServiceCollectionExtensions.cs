@@ -31,6 +31,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
                 return new StreamlinedDocumentClient(provider.GetRequiredService<DocumentClient>(), options.Value.DatabaseId, provider.GetRequiredService<IScaleController>());
             });
+
+            services.AddSingleton<IScaleController, ScaleController<SimpleScaleStrategy>>();
         }
     }
 }
