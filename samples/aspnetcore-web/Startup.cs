@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Azure.Documents.Client;
 
 using todo;
 
@@ -29,13 +30,20 @@ namespace quickstartcore
             // Add framework services.
             services.AddMvc();
 
+            // Add Connection Policy
+            var connectionPolicy = new ConnectionPolicy
+            {
+                ConnectionMode = ConnectionMode.Direct,
+                ConnectionProtocol = Protocol.Tcp
+            };
+            connectionPolicy.PreferredLocations.Add("Japan East");
 
             services.AddStreamlinedDocumentClient(options =>
             {
                 options.AccountEndpoint = Configuration.GetValue<string>("CosmosDB:AccountEndpoint");
                 options.AccountKey = Configuration.GetValue<string>("CosmosDB:AccountKeys");
                 options.DatabaseId = Configuration.GetValue<string>("CosmosDB:Database");
-            });
+            }).SetConnectionPolicy(connectionPolicy);
 
             services.Configure<DocumentDBOptions>(Configuration.GetSection("CosmosDB"));
 
