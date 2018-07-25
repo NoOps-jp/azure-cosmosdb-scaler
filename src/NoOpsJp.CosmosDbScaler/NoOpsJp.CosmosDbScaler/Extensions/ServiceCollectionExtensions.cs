@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddStreamlinedDocumentClient(this IServiceCollection services, Action<StreamlinedDocumentClientOptions> setupAction)
+        public static IStreamlinedDocumentClientBuilder AddStreamlinedDocumentClient(this IServiceCollection services, Action<StreamlinedDocumentClientOptions> setupAction)
         {
             services.Configure(setupAction);
 
@@ -20,10 +20,9 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 var options = provider.GetRequiredService<IOptions<StreamlinedDocumentClientOptions>>();
 
-                return new DocumentClient(new Uri(options.Value.AccountEndpoint), options.Value.AccountKey);
+                return new DocumentClient(new Uri(options.Value.AccountEndpoint), options.Value.AccountKey, options.Value.ConnectionPolicy);
             });
 
-            services.AddSingleton<IScaleController, ScaleController<SimpleScaleStrategy>>();
 
             services.AddSingleton(provider =>
             {
@@ -33,10 +32,34 @@ namespace Microsoft.Extensions.DependencyInjection
             });
 
             services.AddSingleton<IScaleController, ScaleController<SimpleScaleStrategy>>();
+            return new StreamlinedDocumentClientBuilder(services);
         }
-        public static void AddConnectionPolicy(this IServiceCollection services, Action<StreamlinedDocumentClientOptions> setupAction)
+
+
+
+        public static IStreamlinedDocumentClientBuilder SetConnectionPolicy(this IStreamlinedDocumentClientBuilder builder, ConnectionPolicy policy)
         {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+            builder.Services.Configure<StreamlinedDocumentClientOptions>(o => o.ConnectionPolicy = policy);
+            return builder;
+        }
+
+        public interface IStreamlinedDocumentClientBuilder
+        {
+            IServiceCollection Services { get; }
+        }
+        public class StreamlinedDocumentClientBuilder : IStreamlinedDocumentClientBuilder
+        { 
+            public StreamlinedDocumentClientBuilder(IServiceCollection services)
+            {
+                Services = services;
+            }
+            public IServiceCollection Services { get; }
 
         }
+
     }
 }
