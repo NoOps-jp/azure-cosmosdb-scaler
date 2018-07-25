@@ -45,7 +45,7 @@ namespace NoOpsJp.CosmosDbScaler
         /// <param name="collectionId"></param>
         public void TrackTooManyRequest(string collectionId)
         {
-            // CollectionId 単位で IScaleStrategy を持つ
+            // has ScaleStrategy in each CollectionId
             var strategy = _tooManyRequestsStrategy.GetOrAdd(collectionId, TooManyRequestsStrategy.Create(_client, _databaseId, collectionId));
             // TODO implement after API discussion
         }

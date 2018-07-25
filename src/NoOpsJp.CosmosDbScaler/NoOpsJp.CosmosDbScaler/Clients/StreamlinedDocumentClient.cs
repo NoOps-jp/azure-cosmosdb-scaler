@@ -116,7 +116,7 @@ namespace NoOpsJp.CosmosDbScaler.Clients
             {
                 var response = await documentQuery.ExecuteNextAsync<T>();
 
-                // TODO: CollectionId の取り方
+                // TODO: get CollectionID dynamically
                 _scaleController.TrackRequestCharge("Items", response.RequestCharge);
 
                 return response;
@@ -126,7 +126,7 @@ namespace NoOpsJp.CosmosDbScaler.Clients
                 if (ex.StatusCode != null && (int)ex.StatusCode == 429)
                 {
                     // TODO: 429 support
-                    // TODO: CollectionId の取り方
+                    // TODO: get CollectionID dynamically
                     var requiredCharge = ex.RequestCharge * 2;
                     _scaleController.TrackRequestCharge("Items", requiredCharge);
                 }
