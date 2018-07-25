@@ -21,7 +21,12 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
                                  .Do(x => Console.WriteLine($"Step2: {JsonConvert.SerializeObject(x)}"))
                                  .Select(x => x.Zip(x.Skip(1), (a, b)
                                      => (prev: a, current: b)).Aggregate(true, (isFire, tappleValue) => IsFire(isFire, tappleValue)))
-                                 .Subscribe(x => Scaler.AdjustThroughput(new ScaleRequest())); //TODO: とりあえず全部なげてる
+                                 .Subscribe(x =>
+                                    {
+                                        // TODO: Not Implemented
+                                        var sampleRequest = new ScaleRequest("ToDoList", "Items", 800);
+                                        var result = Scaler.AdjustThroughputAsync(sampleRequest).Result;
+                                    }); 
         }
 
         private bool IsFire(bool isFire, (double prev, double current) data)
