@@ -7,7 +7,6 @@ namespace NoOpsJp.CosmosDbScaler.Clients
         public string AccountEndpoint { get; set; }
         public string AccountKey { get; set; }
         public string DatabaseId { get; set; }
-
         public ConnectionPolicy ConnectionPolicy { get; set; }
 
     }
