@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
+using NoOpsJp.CosmosDbScaler.ThroughputMonitor;
+
 using todo;
 
 namespace quickstartcore
@@ -32,6 +35,7 @@ namespace quickstartcore
             // Add framework services.
             services.AddMvc();
 
+            services.AddSingleton<IThroughputAnalyzer, ThroughputAnalyzer<SimpleScaleStrategy>>();
             services.AddSingleton<IDocumentDBRepository<todo.Models.Item>, DocumentDBRepository<todo.Models.Item>>();
             services.Configure<DocumentDBOptions>(Configuration.GetSection("CosmosDB"));
         }

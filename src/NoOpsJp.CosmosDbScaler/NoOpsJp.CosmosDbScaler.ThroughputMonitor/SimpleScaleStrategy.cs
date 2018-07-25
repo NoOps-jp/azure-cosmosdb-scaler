@@ -41,5 +41,9 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
         {
             _requestChargeSubject.OnNext(requestCharge);
         }
+
+        public void AddTooManyRequest()
+        {
+        }
     }
 }

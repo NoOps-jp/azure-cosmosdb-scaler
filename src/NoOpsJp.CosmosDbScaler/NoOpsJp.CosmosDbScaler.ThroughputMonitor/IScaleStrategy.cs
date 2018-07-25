@@ -4,5 +4,6 @@
     {
         SimpleScaler Scaler { get; set; }
         void AddRequestCharge(double requestCharge);
+        void AddTooManyRequest();
     }
 }
