@@ -1,10 +1,11 @@
-﻿using System;
-using Microsoft.Azure.Documents.Client;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Azure.Documents.Client;
+using NoOpsJp.CosmosDbScaler;
 using NoOpsJp.CosmosDbScaler.Clients;
 using NoOpsJp.CosmosDbScaler.Strategies;
+using System;
 
-namespace NoOpsJp.CosmosDbScaler.Extensions
+// ReSharper disable CheckNamespace
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
