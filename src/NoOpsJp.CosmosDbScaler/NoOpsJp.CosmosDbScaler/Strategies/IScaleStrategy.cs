@@ -1,4 +1,6 @@
-﻿namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
+﻿using NoOpsJp.CosmosDbScaler.Scalers;
+
+namespace NoOpsJp.CosmosDbScaler.Strategies
 {
     public interface IScaleStrategy
     {

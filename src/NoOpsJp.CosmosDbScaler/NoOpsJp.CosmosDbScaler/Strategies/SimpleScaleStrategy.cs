@@ -2,10 +2,10 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-
 using Newtonsoft.Json;
+using NoOpsJp.CosmosDbScaler.Scalers;
 
-namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
+namespace NoOpsJp.CosmosDbScaler.Strategies
 {
     public class SimpleScaleStrategy : IScaleStrategy
     {

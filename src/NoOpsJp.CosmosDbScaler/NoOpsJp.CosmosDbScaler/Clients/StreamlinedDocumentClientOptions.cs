@@ -1,4 +1,4 @@
-﻿namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
+﻿namespace NoOpsJp.CosmosDbScaler.Clients
 {
     public class StreamlinedDocumentClientOptions
     {

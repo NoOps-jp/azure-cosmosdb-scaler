@@ -1,15 +1,14 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Documents.Linq;
 
-namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
+namespace NoOpsJp.CosmosDbScaler.Clients
 {
     public class StreamlinedDocumentClient
     {
-        public StreamlinedDocumentClient(DocumentClient documentClient, string databaseId, IThroughputAnalyzer monitor = null)
+        public StreamlinedDocumentClient(DocumentClient documentClient, string databaseId, IScaleController monitor = null)
         {
             _documentClient = documentClient;
             _monitor = monitor;
@@ -18,7 +17,7 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
         }
 
         private readonly DocumentClient _documentClient;
-        private readonly IThroughputAnalyzer _monitor;
+        private readonly IScaleController _monitor;
 
         public string DatabaseId { get; }
 

@@ -1,6 +1,6 @@
-﻿namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
+﻿namespace NoOpsJp.CosmosDbScaler
 {
-    public interface IThroughputAnalyzer
+    public interface IScaleController
     {
         void TrackRequestCharge(string collectionId, double requestCharge);
         void TrackTooManyRequest(string collectionId);

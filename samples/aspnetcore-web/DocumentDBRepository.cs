@@ -1,17 +1,16 @@
-﻿using NoOpsJp.CosmosDbScaler.ThroughputMonitor;
+﻿using NoOpsJp.CosmosDbScaler.Clients;
 
 namespace todo
 {
+    using Microsoft.Azure.Documents;
+    using Microsoft.Azure.Documents.Client;
+    using Microsoft.Azure.Documents.Linq;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Documents;
-    using Microsoft.Azure.Documents.Client;
-    using Microsoft.Azure.Documents.Linq;
 
-    
     public class DocumentDBRepository<T> : IDocumentDBRepository<T> where T : class
     {
         private StreamlinedDocumentClient client;

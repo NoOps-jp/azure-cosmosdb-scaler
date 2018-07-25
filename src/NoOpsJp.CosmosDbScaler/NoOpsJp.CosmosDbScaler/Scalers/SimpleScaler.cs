@@ -1,9 +1,10 @@
-﻿using Microsoft.Azure.Documents;
-using Microsoft.Azure.Documents.Client;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.Documents;
+using Microsoft.Azure.Documents.Client;
+using NoOpsJp.CosmosDbScaler.Extensions;
 
-namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
+namespace NoOpsJp.CosmosDbScaler.Scalers
 {
     public class SimpleScaler
     {
