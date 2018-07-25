@@ -99,7 +99,6 @@ namespace NoOpsJp.CosmosDbScaler.Clients
                 if (ex.StatusCode != null && (int)ex.StatusCode == 429)
                 {
                     _scaleController.TrackRequestCharge(collectionId, ex.RequestCharge);
-                    _scaleController.TrackTooManyRequest(collectionId);
                 }
 
                 throw;

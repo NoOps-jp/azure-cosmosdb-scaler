@@ -51,7 +51,7 @@ namespace NoOpsJp.CosmosDbScaler.Scalers
 
         internal virtual bool NeedScale(ScaleRequest scaleRequest, Offer currentOffer)
         {
-            // TODO: 仮実装！
+            // TODO: temporaly implimentation
             if (currentOffer.GetThroughput() == scaleRequest.TargetThroughput)
             {
                 return false;

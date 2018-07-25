@@ -1,17 +1,21 @@
-﻿using Microsoft.Azure.Documents;
-using NoOpsJp.CosmosDbScaler.Strategies;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Options;
 using NoOpsJp.CosmosDbScaler.Clients;
+using NoOpsJp.CosmosDbScaler.Strategies;
 
 namespace NoOpsJp.CosmosDbScaler
 {
-    public class ScaleController<TStrategy> : IScaleController where TStrategy : IScaleStrategy<double>, new()
+    public class ScaleController<TStrategy> : IScaleController where TStrategy : IScaleStrategy<double>
     {
         private readonly IDocumentClient _client;
         private readonly string _databaseId;
-        private readonly ConcurrentDictionary<string, IScaleStrategy<double>> _strategies
+        private readonly ConcurrentDictionary<string, IScaleStrategy<double>> _usageStrategy
+            = new ConcurrentDictionary<string, IScaleStrategy<double>>();
+
+        // TODO needs discussion
+        private readonly ConcurrentDictionary<string, IScaleStrategy<double>> _tooManyRequestsStrategy
             = new ConcurrentDictionary<string, IScaleStrategy<double>>();
 
 
@@ -29,8 +33,8 @@ namespace NoOpsJp.CosmosDbScaler
         /// <param name="requestCharge"></param>
         public void TrackRequestCharge(string collectionId, double requestCharge)
         {
-            // has ScaleStrategy in each CollectionId
-            var strategy = _strategies.GetOrAdd(collectionId,SimpleScaleStrategy.Create(_client, _databaseId, collectionId));
+            // CollectionId 単位で IScaleStrategy を持つ
+            var strategy = _usageStrategy.GetOrAdd(collectionId, SimpleScaleStrategy.Create(_client, _databaseId, collectionId));
 
             strategy.AddRequestCharge(requestCharge);
         }
@@ -42,7 +46,8 @@ namespace NoOpsJp.CosmosDbScaler
         public void TrackTooManyRequest(string collectionId)
         {
             // has ScaleStrategy in each CollectionId
-            var strategy = _strategies.GetOrAdd(collectionId, x => new TStrategy());
+            var strategy = _tooManyRequestsStrategy.GetOrAdd(collectionId, TooManyRequestsStrategy.Create(_client, _databaseId, collectionId));
+            // TODO implement after API discussion
         }
 
     }
