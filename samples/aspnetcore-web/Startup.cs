@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
-using NoOpsJp.CosmosDbScaler.ThroughputMonitor;
 
 using todo;
 
@@ -35,7 +29,13 @@ namespace quickstartcore
             // Add framework services.
             services.AddMvc();
 
-            services.AddSingleton<IThroughputAnalyzer, ThroughputAnalyzer<SimpleScaleStrategy>>();
+            services.AddStreamlinedDocumentClient(options =>
+            {
+                options.AccountEndpoint = Configuration.GetValue<string>("CosmosDB:AccountEndpoint");
+                options.AccountKey = Configuration.GetValue<string>("CosmosDB:AccountKeys");
+                options.DatabaseId = Configuration.GetValue<string>("CosmosDB:Database");
+            });
+
             services.AddSingleton<IDocumentDBRepository<todo.Models.Item>, DocumentDBRepository<todo.Models.Item>>();
             services.Configure<DocumentDBOptions>(Configuration.GetSection("CosmosDB"));
         }
