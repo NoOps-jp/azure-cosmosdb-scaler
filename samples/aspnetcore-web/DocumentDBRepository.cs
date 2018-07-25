@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-
-using NoOpsJp.CosmosDbScaler.ThroughputMonitor;
+﻿using NoOpsJp.CosmosDbScaler.ThroughputMonitor;
 
 namespace todo
 {
@@ -17,19 +15,17 @@ namespace todo
     public class DocumentDBRepository<T> : IDocumentDBRepository<T> where T : class
     {
         private StreamlinedDocumentClient client;
-        private DocumentDBOptions _options;
 
-        public DocumentDBRepository(IOptions<DocumentDBOptions> options, IThroughputAnalyzer throughputAnalyzer)
+        public DocumentDBRepository(StreamlinedDocumentClient streamlinedDocumentClient)
         {
-            _options = options.Value;
-            this.client = new StreamlinedDocumentClient(new Uri(_options.AccountEndpoint), _options.AccountKeys, _options.Database, throughputAnalyzer);
+            client = streamlinedDocumentClient;
         }
 
         public async Task<T> GetItemAsync(string id)
         {
             try
             {
-                return await client.ReadDocumentAsync<T>(_options.Collection, id);
+                return await client.ReadDocumentAsync<T>("Items", id);
             }
             catch (DocumentClientException e)
             {
@@ -46,7 +42,7 @@ namespace todo
 
         public async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate)
         {
-            var query = client.CreateDocumentQuery<T>(_options.Collection, new FeedOptions { MaxItemCount = -1 })
+            var query = client.CreateDocumentQuery<T>("Items", new FeedOptions { MaxItemCount = -1 })
                               .Where(predicate)
                               .AsDocumentQuery();
 
@@ -61,17 +57,17 @@ namespace todo
 
         public async Task CreateItemAsync(T item)
         {
-            await client.CreateDocumentAsync(_options.Collection, item);
+            await client.CreateDocumentAsync("Items", item);
         }
 
         public async Task UpdateItemAsync(string id, T item)
         {
-            await client.ReplaceDocumentAsync(_options.Collection, id, item);
+            await client.ReplaceDocumentAsync("Items", id, item);
         }
 
         public async Task DeleteItemAsync(string id)
         {
-            await client.DeleteDocumentAsync(_options.Collection, id);
+            await client.DeleteDocumentAsync("Items", id);
         }
     }
 

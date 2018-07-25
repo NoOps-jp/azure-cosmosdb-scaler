@@ -1,6 +1,8 @@
 ﻿using Microsoft.Azure.Documents;
 using System.Collections.Concurrent;
 
+using Microsoft.Azure.Documents.Client;
+
 namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
 {
     public class ThroughputAnalyzer<TStrategy> : IThroughputAnalyzer where TStrategy : IScaleStrategy, new()
@@ -8,7 +10,7 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
         private readonly IDocumentClient _client;
         private readonly string _databaseId;
 
-        public ThroughputAnalyzer(IDocumentClient client, string databaseId)
+        public ThroughputAnalyzer(DocumentClient client, string databaseId)
         {
             _client = client;
             _databaseId = databaseId;
