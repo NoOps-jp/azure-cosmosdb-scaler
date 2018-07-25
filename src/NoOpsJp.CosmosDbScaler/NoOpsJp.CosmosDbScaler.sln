@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27729.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NoOpsJp.CosmosDbScaler", "NoOpsJp.CosmosDbScaler.ThroughputMonitor\NoOpsJp.CosmosDbScaler.csproj", "{5A7DBFEF-1BBE-42D8-BCAD-C9BC034FAE64}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NoOpsJp.CosmosDbScaler", "NoOpsJp.CosmosDbScaler\NoOpsJp.CosmosDbScaler.csproj", "{5A7DBFEF-1BBE-42D8-BCAD-C9BC034FAE64}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

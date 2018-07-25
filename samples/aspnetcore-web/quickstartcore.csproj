@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\NoOpsJp.CosmosDbScaler\NoOpsJp.CosmosDbScaler.ThroughputMonitor\NoOpsJp.CosmosDbScaler.ThroughputMonitor.csproj" />
+    <ProjectReference Include="..\..\src\NoOpsJp.CosmosDbScaler\NoOpsJp.CosmosDbScaler\NoOpsJp.CosmosDbScaler.csproj" />
   </ItemGroup>
 
 </Project>
