@@ -8,16 +8,16 @@ namespace NoOpsJp.CosmosDbScaler.Clients
 {
     public class StreamlinedDocumentClient
     {
-        public StreamlinedDocumentClient(DocumentClient documentClient, string databaseId, IScaleController monitor = null)
+        public StreamlinedDocumentClient(DocumentClient documentClient, string databaseId, IScaleController scaleController)
         {
             _documentClient = documentClient;
-            _monitor = monitor;
+            _scaleController = scaleController;
 
             DatabaseId = databaseId;
         }
 
         private readonly DocumentClient _documentClient;
-        private readonly IScaleController _monitor;
+        private readonly IScaleController _scaleController;
 
         public string DatabaseId { get; }
 
@@ -27,7 +27,7 @@ namespace NoOpsJp.CosmosDbScaler.Clients
             {
                 var response = await _documentClient.ReadDocumentAsync<T>(UriFactory.CreateDocumentUri(DatabaseId, collectionId, documentId));
 
-                _monitor.TrackRequestCharge(collectionId, response.RequestCharge);
+                _scaleController.TrackRequestCharge(collectionId, response.RequestCharge);
 
                 return response.Document;
             }
@@ -35,8 +35,9 @@ namespace NoOpsJp.CosmosDbScaler.Clients
             {
                 if (ex.StatusCode != null && (int)ex.StatusCode == 429)
                 {
-                    _monitor.TrackRequestCharge(collectionId, ex.RequestCharge);
-                    _monitor.TrackTooManyRequest(collectionId);
+                    // TODO: 429 support
+                    var requiredCharge = ex.RequestCharge * 2;
+                    _scaleController.TrackRequestCharge(collectionId, requiredCharge);
                 }
 
                 throw;
@@ -49,14 +50,15 @@ namespace NoOpsJp.CosmosDbScaler.Clients
             {
                 var response = await _documentClient.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, collectionId), document);
 
-                _monitor.TrackRequestCharge(collectionId, response.RequestCharge);
+                _scaleController.TrackRequestCharge(collectionId, response.RequestCharge);
             }
             catch (DocumentClientException ex)
             {
                 if (ex.StatusCode != null && (int)ex.StatusCode == 429)
                 {
-                    _monitor.TrackRequestCharge(collectionId, ex.RequestCharge);
-                    _monitor.TrackTooManyRequest(collectionId);
+                    // TODO: 429 support
+                    var requiredCharge = ex.RequestCharge * 2;
+                    _scaleController.TrackRequestCharge(collectionId, requiredCharge);
                 }
 
                 throw;
@@ -69,14 +71,15 @@ namespace NoOpsJp.CosmosDbScaler.Clients
             {
                 var response = await _documentClient.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, collectionId, documentId), document);
 
-                _monitor.TrackRequestCharge(collectionId, response.RequestCharge);
+                _scaleController.TrackRequestCharge(collectionId, response.RequestCharge);
             }
             catch (DocumentClientException ex)
             {
                 if (ex.StatusCode != null && (int)ex.StatusCode == 429)
                 {
-                    _monitor.TrackRequestCharge(collectionId, ex.RequestCharge);
-                    _monitor.TrackTooManyRequest(collectionId);
+                    // TODO: 429 support
+                    var requiredCharge = ex.RequestCharge * 2;
+                    _scaleController.TrackRequestCharge(collectionId, requiredCharge);
                 }
 
                 throw;
@@ -89,14 +92,14 @@ namespace NoOpsJp.CosmosDbScaler.Clients
             {
                 var response = await _documentClient.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, collectionId, documentId));
 
-                _monitor.TrackRequestCharge(collectionId, response.RequestCharge);
+                _scaleController.TrackRequestCharge(collectionId, response.RequestCharge);
             }
             catch (DocumentClientException ex)
             {
                 if (ex.StatusCode != null && (int)ex.StatusCode == 429)
                 {
-                    _monitor.TrackRequestCharge(collectionId, ex.RequestCharge);
-                    _monitor.TrackTooManyRequest(collectionId);
+                    _scaleController.TrackRequestCharge(collectionId, ex.RequestCharge);
+                    _scaleController.TrackTooManyRequest(collectionId);
                 }
 
                 throw;
@@ -115,7 +118,7 @@ namespace NoOpsJp.CosmosDbScaler.Clients
                 var response = await documentQuery.ExecuteNextAsync<T>();
 
                 // TODO: CollectionId の取り方
-                _monitor.TrackRequestCharge("", response.RequestCharge);
+                _scaleController.TrackRequestCharge("Items", response.RequestCharge);
 
                 return response;
             }
@@ -123,8 +126,10 @@ namespace NoOpsJp.CosmosDbScaler.Clients
             {
                 if (ex.StatusCode != null && (int)ex.StatusCode == 429)
                 {
-                    _monitor.TrackRequestCharge("", ex.RequestCharge);
-                    _monitor.TrackTooManyRequest("");
+                    // TODO: 429 support
+                    // TODO: CollectionId の取り方
+                    var requiredCharge = ex.RequestCharge * 2;
+                    _scaleController.TrackRequestCharge("Items", requiredCharge);
                 }
 
                 throw;
