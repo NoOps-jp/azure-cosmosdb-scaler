@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
+﻿namespace NoOpsJp.CosmosDbScaler
 {
     public class ScaleResponse
     {

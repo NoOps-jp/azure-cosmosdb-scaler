@@ -2,11 +2,15 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+<<<<<<< HEAD:src/NoOpsJp.CosmosDbScaler/NoOpsJp.CosmosDbScaler.ThroughputMonitor/SimpleScaleStrategy.cs
 using System.Collections.Generic;
 
+=======
+>>>>>>> 9a474fa95a9d955a02e6f01b233cfa559c7e08ad:src/NoOpsJp.CosmosDbScaler/NoOpsJp.CosmosDbScaler/Strategies/SimpleScaleStrategy.cs
 using Newtonsoft.Json;
+using NoOpsJp.CosmosDbScaler.Scalers;
 
-namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
+namespace NoOpsJp.CosmosDbScaler.Strategies
 {
     public class SimpleScaleStrategy : IScaleStrategy
     {

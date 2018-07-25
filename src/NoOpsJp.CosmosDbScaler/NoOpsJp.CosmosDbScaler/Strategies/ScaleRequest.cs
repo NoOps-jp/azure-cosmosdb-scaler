@@ -1,4 +1,4 @@
-﻿namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
+﻿namespace NoOpsJp.CosmosDbScaler
 {
     public class ScaleRequest 
     { 
