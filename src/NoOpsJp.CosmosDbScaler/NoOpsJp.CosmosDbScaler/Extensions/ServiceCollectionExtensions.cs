@@ -34,5 +34,9 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddSingleton<IScaleController, ScaleController<SimpleScaleStrategy>>();
         }
+        public static void AddConnectionPolicy(this IServiceCollection services, Action<StreamlinedDocumentClientOptions> setupAction)
+        {
+
+        }
     }
 }
