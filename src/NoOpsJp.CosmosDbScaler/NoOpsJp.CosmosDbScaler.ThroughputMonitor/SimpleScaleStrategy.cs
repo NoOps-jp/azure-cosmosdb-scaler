@@ -39,19 +39,20 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
         }
 
         //Is DateTime ok?
-        private List<DateTime> _tooManyRequestsHistory = new List<DateTime>();
+        private List<long> _tooManyRequestHistory = new List<long>();
 
         public void AddTooManyRequest()
         {
-            var tooManyRequestEvent = DateTime.Now;
+            var eventTime = DateTime.Now;
+            long tooManyRequestEvent = eventTime.Ticks;
             
-            _tooManyRequestsHistory.Add(tooManyRequestEvent); 
+            _tooManyRequestHistory.Add(tooManyRequestEvent); 
         
-            _tooManyRequestsHistory = _tooManyRequestsHistory
-                .Where(record => record >= tooManyRequestEvent.AddSeconds(-5))
+            _tooManyRequestHistory = _tooManyRequestHistory
+                .Where(record => record >= eventTime.AddSeconds(-5).Ticks)
                 .ToList();
 
-            if (_tooManyRequestsHistory.Count >= 4)
+            if (_tooManyRequestHistory.Count >= 4)
             {
                 // TODO Call scaler
             }
