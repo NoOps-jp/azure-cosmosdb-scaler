@@ -1,4 +1,5 @@
 ﻿using NoOpsJp.CosmosDbScaler.Scalers;
+using System.Threading.Tasks;
 
 namespace NoOpsJp.CosmosDbScaler.Strategies
 {
@@ -6,6 +7,5 @@ namespace NoOpsJp.CosmosDbScaler.Strategies
     {
         SimpleScaler Scaler { get; set; }
         void AddRequestCharge(double requestCharge);
-        void AddTooManyRequest();
     }
 }

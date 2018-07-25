@@ -42,25 +42,5 @@ namespace NoOpsJp.CosmosDbScaler.Strategies
         {
             _requestChargeSubject.OnNext(requestCharge);
         }
-
-        //Is DateTime ok?
-        private List<long> _tooManyRequestHistory = new List<long>();
-
-        public void AddTooManyRequest()
-        {
-            var eventTime = DateTime.Now;
-            long tooManyRequestEvent = eventTime.Ticks;
-            
-            _tooManyRequestHistory.Add(tooManyRequestEvent); 
-        
-            _tooManyRequestHistory = _tooManyRequestHistory
-                .Where(record => record >= eventTime.AddSeconds(-5).Ticks)
-                .ToList();
-
-            if (_tooManyRequestHistory.Count >= 4)
-            {
-                // TODO Call scaler
-            }
-        }
     }
 }
