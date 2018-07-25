@@ -1,16 +1,17 @@
-﻿using Microsoft.Azure.Documents;
-using System.Collections.Concurrent;
-
+﻿using System.Collections.Concurrent;
+using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
+using NoOpsJp.CosmosDbScaler.Scalers;
+using NoOpsJp.CosmosDbScaler.Strategies;
 
-namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
+namespace NoOpsJp.CosmosDbScaler
 {
-    public class ThroughputAnalyzer<TStrategy> : IThroughputAnalyzer where TStrategy : IScaleStrategy, new()
+    public class ScaleController<TStrategy> : IScaleController where TStrategy : IScaleStrategy, new()
     {
         private readonly IDocumentClient _client;
         private readonly string _databaseId;
 
-        public ThroughputAnalyzer(DocumentClient client, string databaseId)
+        public ScaleController(DocumentClient client, string databaseId)
         {
             _client = client;
             _databaseId = databaseId;

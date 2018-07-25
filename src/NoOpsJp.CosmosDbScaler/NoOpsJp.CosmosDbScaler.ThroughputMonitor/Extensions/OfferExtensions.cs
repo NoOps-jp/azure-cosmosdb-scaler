@@ -1,6 +1,6 @@
 ﻿using Microsoft.Azure.Documents;
 
-namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
+namespace NoOpsJp.CosmosDbScaler.Extensions
 {
     public static class OfferExtensions
     {
