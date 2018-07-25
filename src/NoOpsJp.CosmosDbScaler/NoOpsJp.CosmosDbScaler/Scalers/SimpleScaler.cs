@@ -31,7 +31,7 @@ namespace NoOpsJp.CosmosDbScaler.Scalers
         {
             var currentOffer = await GetCurrentOfferAsync();
 
-            if (NeedScale())
+            if (NeedScale(scaleRequest, currentOffer))
             {
                 Offer replaced = await _client.ReplaceOfferAsync(new OfferV2(currentOffer, scaleRequest.TargetThroughput));
                 return new ScaleResponse
@@ -49,20 +49,22 @@ namespace NoOpsJp.CosmosDbScaler.Scalers
         }
 
 
-        internal virtual bool NeedScale()
+        internal virtual bool NeedScale(ScaleRequest scaleRequest, Offer currentOffer)
         {
-            // TODO: Insert judgment on whether to actually execute Scale
+            // TODO: 仮実装！
+            if (currentOffer.GetThroughput() == scaleRequest.TargetThroughput)
+            {
+                return false;
+            }
+
             return true;
-
         }
-
 
 
         private async Task<Offer> GetCurrentOfferAsync()
         {
+            // this proccess's RU is 1
             DocumentCollection collection = await _client.ReadDocumentCollectionAsync(UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId));
-
-            // get current throuput
             var currentOffer = _client.CreateOfferQuery()
                 .AsEnumerable()
                 .Single(o => o.ResourceLink == collection.SelfLink);

@@ -2,13 +2,13 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Collections.Generic;
+using Microsoft.Azure.Documents;
 using Newtonsoft.Json;
 using NoOpsJp.CosmosDbScaler.Scalers;
 
 namespace NoOpsJp.CosmosDbScaler.Strategies
 {
-    public class SimpleScaleStrategy : IScaleStrategy
+    public class SimpleScaleStrategy : IScaleStrategy<double>
     {
         private readonly Subject<double> _requestChargeSubject = new Subject<double>();
 
@@ -27,7 +27,7 @@ namespace NoOpsJp.CosmosDbScaler.Strategies
                                         // TODO: Not Implemented
                                         var sampleRequest = new ScaleRequest("ToDoList", "Items", 800);
                                         var result = Scaler.AdjustThroughputAsync(sampleRequest).Result;
-                                    }); 
+                                    });
         }
 
         private bool IsFire(bool isFire, (double prev, double current) data)
@@ -42,5 +42,19 @@ namespace NoOpsJp.CosmosDbScaler.Strategies
         {
             _requestChargeSubject.OnNext(requestCharge);
         }
+
+
+        #region factory
+
+        // とりあえずの実装
+        public static IScaleStrategy<double> Create(IDocumentClient client, string databaseId, string collectionId)
+        {
+           return new SimpleScaleStrategy()
+            {
+                Scaler = new SimpleScaler(client, databaseId, collectionId)
+            };
+        }
+
+        #endregion
     }
 }

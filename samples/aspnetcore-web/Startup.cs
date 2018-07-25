@@ -29,6 +29,7 @@ namespace quickstartcore
             // Add framework services.
             services.AddMvc();
 
+
             services.AddStreamlinedDocumentClient(options =>
             {
                 options.AccountEndpoint = Configuration.GetValue<string>("CosmosDB:AccountEndpoint");
@@ -36,8 +37,9 @@ namespace quickstartcore
                 options.DatabaseId = Configuration.GetValue<string>("CosmosDB:Database");
             });
 
-            services.AddSingleton<IDocumentDBRepository<todo.Models.Item>, DocumentDBRepository<todo.Models.Item>>();
             services.Configure<DocumentDBOptions>(Configuration.GetSection("CosmosDB"));
+
+            services.AddSingleton<IDocumentDBRepository<todo.Models.Item>, DocumentDBRepository<todo.Models.Item>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

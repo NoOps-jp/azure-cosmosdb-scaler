@@ -3,9 +3,10 @@ using System.Threading.Tasks;
 
 namespace NoOpsJp.CosmosDbScaler.Strategies
 {
-    public interface IScaleStrategy
+    public interface IScaleStrategy<in TContext>
     {
         SimpleScaler Scaler { get; set; }
-        void AddRequestCharge(double requestCharge);
+
+        void AddRequestCharge(TContext context);
     }
 }

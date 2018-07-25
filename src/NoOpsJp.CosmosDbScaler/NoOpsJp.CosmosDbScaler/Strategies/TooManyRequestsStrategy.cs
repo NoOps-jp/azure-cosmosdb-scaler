@@ -7,7 +7,7 @@ using NoOpsJp.CosmosDbScaler.Scalers;
 
 namespace NoOpsJp.CosmosDbScaler.Strategies
 {
-    class TooManyRequestsStrategy : IScaleStrategy
+    class TooManyRequestsStrategy : IScaleStrategy<double>
     {
         private List<long> _tooManyRequestsHistory = new List<long>();
 
