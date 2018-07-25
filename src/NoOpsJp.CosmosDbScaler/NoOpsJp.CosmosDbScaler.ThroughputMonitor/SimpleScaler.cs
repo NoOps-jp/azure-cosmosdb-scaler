@@ -18,28 +18,54 @@ namespace NoOpsJp.CosmosDbScaler.ThroughputMonitor
             _collectionId = collectionId;
         }
 
+
+        public async Task<int> GetCurrentThroughputAsync()
+        {
+            var currentOffer = await GetCurrentOfferAsync();
+            return currentOffer.GetThroughput();
+        }
+
+
         public async Task<ScaleResponse> AdjustThroughputAsync(ScaleRequest scaleRequest)
         {
-            DocumentCollection collection =
-                await _client.ReadDocumentCollectionAsync(UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId));
-            
-            // get current throuput
-            var offersFeed = await _client.ReadOffersFeedAsync();
-            var currentOffer = offersFeed.Single(o => o.ResourceLink == collection.SelfLink);
+            var currentOffer = await GetCurrentOfferAsync();
 
-            // TODO: Insert judgment on whether to actually execute Scale
-
-            // change throuput
-            var replaced = await _client.ReplaceOfferAsync(new OfferV2(currentOffer, scaleRequest.TargetThroughput));
-            var newOffer = (OfferV2)replaced;
-
-            // return response
-            var response = new ScaleResponse
+            if (NeedScale())
             {
-                IsAccepted = true,
-                AdjustedThroughput = newOffer.Content.OfferThroughput
+                Offer replaced = await _client.ReplaceOfferAsync(new OfferV2(currentOffer, scaleRequest.TargetThroughput));
+                return new ScaleResponse
+                {
+                    IsAccepted = true,
+                    AdjustedThroughput = replaced.GetThroughput()
+                };
+            }
+
+            return new ScaleResponse()
+            {
+                IsAccepted = false,
+                AdjustedThroughput = currentOffer.GetThroughput()
             };
-            return response;
+        }
+
+
+        internal virtual bool NeedScale()
+        {
+            // TODO: Insert judgment on whether to actually execute Scale
+            return true;
+
+        }
+
+
+
+        private async Task<Offer> GetCurrentOfferAsync()
+        {
+            DocumentCollection collection = await _client.ReadDocumentCollectionAsync(UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId));
+
+            // get current throuput
+            var currentOffer = _client.CreateOfferQuery()
+                .AsEnumerable()
+                .Single(o => o.ResourceLink == collection.SelfLink);
+            return currentOffer;
         }
     }
 }
