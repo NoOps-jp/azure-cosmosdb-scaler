@@ -1,8 +1,10 @@
 ﻿using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using NoOpsJp.CosmosDbScaler.Extensions;
+using NoOpsJp.CosmosDbScaler.Strategies;
 
 namespace NoOpsJp.CosmosDbScaler.Scalers
 {
@@ -11,6 +13,8 @@ namespace NoOpsJp.CosmosDbScaler.Scalers
         private readonly IDocumentClient _client;
         private readonly string _databaseId;
         private readonly string _collectionId;
+
+        private readonly SimpleReducer _simpleReducer; //TODO DI
 
         public SimpleScaler(IDocumentClient client, string databaseId, string collectionId)
         {
@@ -33,6 +37,7 @@ namespace NoOpsJp.CosmosDbScaler.Scalers
 
             if (NeedScale(scaleRequest, currentOffer))
             {
+                // TODO: when scale increases, start timer
                 Offer replaced = await _client.ReplaceOfferAsync(new OfferV2(currentOffer, scaleRequest.TargetThroughput));
                 return new ScaleResponse
                 {
@@ -47,7 +52,6 @@ namespace NoOpsJp.CosmosDbScaler.Scalers
                 AdjustedThroughput = currentOffer.GetThroughput()
             };
         }
-
 
         internal virtual bool NeedScale(ScaleRequest scaleRequest, Offer currentOffer)
         {
@@ -70,5 +74,21 @@ namespace NoOpsJp.CosmosDbScaler.Scalers
                 .Single(o => o.ResourceLink == collection.SelfLink);
             return currentOffer;
         }
+
+        #region determine reduction
+
+        // TODO: timer implementation and call "ReduceThroughputAsync()"
+
+        // TODO: improve for "AdjustThroughputAsync()" refactoring
+
+        private async Task ReduceThroughputAsync()
+        {
+            var scaleRequest = _simpleReducer.GetReductionThroughput(_databaseId, _collectionId);
+            await AdjustThroughputAsync(scaleRequest);
+        }
+
+
+
+        #endregion
     }
 }
