@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
@@ -8,18 +9,21 @@ namespace NoOpsJp.CosmosDbScaler.Clients
 {
     public class StreamlinedDocumentClient
     {
-        public StreamlinedDocumentClient(DocumentClient documentClient, string databaseId, IScaleController scaleController)
+        public StreamlinedDocumentClient(DocumentClient documentClient, string databaseId, IList<IRequestProcessor> requestProcessors)
         {
             _documentClient = documentClient;
-            _scaleController = scaleController;
 
             DatabaseId = databaseId;
+            RequestProcessors = requestProcessors;
+
+            RaiseInitialize();
         }
 
         private readonly DocumentClient _documentClient;
-        private readonly IScaleController _scaleController;
 
         public string DatabaseId { get; }
+
+        public IList<IRequestProcessor> RequestProcessors { get; }
 
         public async Task<T> ReadDocumentAsync<T>(string collectionId, string documentId)
         {
@@ -27,7 +31,7 @@ namespace NoOpsJp.CosmosDbScaler.Clients
             {
                 var response = await _documentClient.ReadDocumentAsync<T>(UriFactory.CreateDocumentUri(DatabaseId, collectionId, documentId));
 
-                _scaleController.TrackRequestCharge(collectionId, response.RequestCharge);
+                RaisePostDocumentRequest(collectionId, response);
 
                 return response.Document;
             }
@@ -35,9 +39,7 @@ namespace NoOpsJp.CosmosDbScaler.Clients
             {
                 if (ex.StatusCode != null && (int)ex.StatusCode == 429)
                 {
-                    // TODO: 429 support
-                    var requiredCharge = ex.RequestCharge * 2;
-                    _scaleController.TrackRequestCharge(collectionId, requiredCharge);
+                    RaiseExceptionHandled(collectionId, ex);
                 }
 
                 throw;
@@ -50,15 +52,13 @@ namespace NoOpsJp.CosmosDbScaler.Clients
             {
                 var response = await _documentClient.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, collectionId), document);
 
-                _scaleController.TrackRequestCharge(collectionId, response.RequestCharge);
+                RaisePostDocumentRequest(collectionId, response);
             }
             catch (DocumentClientException ex)
             {
                 if (ex.StatusCode != null && (int)ex.StatusCode == 429)
                 {
-                    // TODO: 429 support
-                    var requiredCharge = ex.RequestCharge * 2;
-                    _scaleController.TrackRequestCharge(collectionId, requiredCharge);
+                    RaiseExceptionHandled(collectionId, ex);
                 }
 
                 throw;
@@ -71,15 +71,13 @@ namespace NoOpsJp.CosmosDbScaler.Clients
             {
                 var response = await _documentClient.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, collectionId, documentId), document);
 
-                _scaleController.TrackRequestCharge(collectionId, response.RequestCharge);
+                RaisePostDocumentRequest(collectionId, response);
             }
             catch (DocumentClientException ex)
             {
                 if (ex.StatusCode != null && (int)ex.StatusCode == 429)
                 {
-                    // TODO: 429 support
-                    var requiredCharge = ex.RequestCharge * 2;
-                    _scaleController.TrackRequestCharge(collectionId, requiredCharge);
+                    RaiseExceptionHandled(collectionId, ex);
                 }
 
                 throw;
@@ -92,13 +90,13 @@ namespace NoOpsJp.CosmosDbScaler.Clients
             {
                 var response = await _documentClient.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, collectionId, documentId));
 
-                _scaleController.TrackRequestCharge(collectionId, response.RequestCharge);
+                RaisePostDocumentRequest(collectionId, response);
             }
             catch (DocumentClientException ex)
             {
                 if (ex.StatusCode != null && (int)ex.StatusCode == 429)
                 {
-                    _scaleController.TrackRequestCharge(collectionId, ex.RequestCharge);
+                    RaiseExceptionHandled(collectionId, ex);
                 }
 
                 throw;
@@ -116,8 +114,7 @@ namespace NoOpsJp.CosmosDbScaler.Clients
             {
                 var response = await documentQuery.ExecuteNextAsync<T>();
 
-                // TODO: get CollectionID dynamically
-                _scaleController.TrackRequestCharge("Items", response.RequestCharge);
+                RaisePostDocumentRequest("Items", null);
 
                 return response;
             }
@@ -125,13 +122,35 @@ namespace NoOpsJp.CosmosDbScaler.Clients
             {
                 if (ex.StatusCode != null && (int)ex.StatusCode == 429)
                 {
-                    // TODO: 429 support
                     // TODO: get CollectionID dynamically
-                    var requiredCharge = ex.RequestCharge * 2;
-                    _scaleController.TrackRequestCharge("Items", requiredCharge);
+                    RaiseExceptionHandled("Items", ex);
                 }
 
                 throw;
+            }
+        }
+
+        private void RaiseInitialize()
+        {
+            foreach (var processor in RequestProcessors)
+            {
+                processor.Initialize(_documentClient, DatabaseId);
+            }
+        }
+
+        private void RaisePostDocumentRequest(string collectionId, ResourceResponseBase response)
+        {
+            foreach (var processor in RequestProcessors)
+            {
+                processor.PostDocumentRequest(collectionId, response);
+            }
+        }
+
+        private void RaiseExceptionHandled(string collectionId, DocumentClientException exception)
+        {
+            foreach (var processor in RequestProcessors)
+            {
+                processor.ExceptionHandled(collectionId, exception);
             }
         }
     }

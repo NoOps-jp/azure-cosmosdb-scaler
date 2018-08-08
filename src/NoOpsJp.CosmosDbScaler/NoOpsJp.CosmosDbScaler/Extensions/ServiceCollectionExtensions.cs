@@ -3,9 +3,7 @@
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Options;
 
-using NoOpsJp.CosmosDbScaler;
 using NoOpsJp.CosmosDbScaler.Clients;
-using NoOpsJp.CosmosDbScaler.Strategies;
 
 // ReSharper disable CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
@@ -23,19 +21,15 @@ namespace Microsoft.Extensions.DependencyInjection
                 return new DocumentClient(new Uri(options.Value.AccountEndpoint), options.Value.AccountKey, options.Value.ConnectionPolicy);
             });
 
-
             services.AddSingleton(provider =>
             {
                 var options = provider.GetRequiredService<IOptions<StreamlinedDocumentClientOptions>>();
 
-                return new StreamlinedDocumentClient(provider.GetRequiredService<DocumentClient>(), options.Value.DatabaseId, provider.GetRequiredService<IScaleController>());
+                return new StreamlinedDocumentClient(provider.GetRequiredService<DocumentClient>(), options.Value.DatabaseId, options.Value.RequestProcessors);
             });
 
-            services.AddSingleton<IScaleController, ScaleController<SimpleScaleStrategy>>();
             return new StreamlinedDocumentClientBuilder(services);
         }
-
-
 
         public static IStreamlinedDocumentClientBuilder SetConnectionPolicy(this IStreamlinedDocumentClientBuilder builder, ConnectionPolicy policy)
         {
@@ -43,7 +37,21 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 throw new ArgumentNullException(nameof(builder));
             }
+
             builder.Services.Configure<StreamlinedDocumentClientOptions>(o => o.ConnectionPolicy = policy);
+
+            return builder;
+        }
+
+        public static IStreamlinedDocumentClientBuilder SetRequestProcessors(this IStreamlinedDocumentClientBuilder builder, params IRequestProcessor[] requestProcessors)
+        {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            builder.Services.Configure<StreamlinedDocumentClientOptions>(o => o.RequestProcessors = requestProcessors);
+
             return builder;
         }
 
@@ -51,15 +59,15 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             IServiceCollection Services { get; }
         }
+
         public class StreamlinedDocumentClientBuilder : IStreamlinedDocumentClientBuilder
-        { 
+        {
             public StreamlinedDocumentClientBuilder(IServiceCollection services)
             {
                 Services = services;
             }
+
             public IServiceCollection Services { get; }
-
         }
-
     }
 }

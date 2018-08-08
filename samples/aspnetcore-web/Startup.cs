@@ -5,6 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Azure.Documents.Client;
 
+using NoOpsJp.CosmosDbScaler;
+using NoOpsJp.CosmosDbScaler.Strategies;
+
 using todo;
 
 namespace quickstartcore
@@ -39,11 +42,13 @@ namespace quickstartcore
             connectionPolicy.PreferredLocations.Add("Japan East");
 
             services.AddStreamlinedDocumentClient(options =>
-            {
-                options.AccountEndpoint = Configuration.GetValue<string>("CosmosDB:AccountEndpoint");
-                options.AccountKey = Configuration.GetValue<string>("CosmosDB:AccountKeys");
-                options.DatabaseId = Configuration.GetValue<string>("CosmosDB:Database");
-            }).SetConnectionPolicy(connectionPolicy);
+                    {
+                        options.AccountEndpoint = Configuration.GetValue<string>("CosmosDB:AccountEndpoint");
+                        options.AccountKey = Configuration.GetValue<string>("CosmosDB:AccountKeys");
+                        options.DatabaseId = Configuration.GetValue<string>("CosmosDB:Database");
+                    })
+                    .SetConnectionPolicy(connectionPolicy)
+                    .SetRequestProcessors(new ScaleController<SimpleScaleStrategy>());
 
             services.Configure<DocumentDBOptions>(Configuration.GetSection("CosmosDB"));
 
